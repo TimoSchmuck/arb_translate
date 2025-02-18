@@ -32,8 +32,7 @@ class DeeplTranslationDelegate extends TranslationDelegate {
     final encodedResources = JsonEncoder.withIndent('  ').convert(resources);
 
     try {
-      Translator translator =
-          Translator(authKey: _apiKey, maxRetries: maxRetryCount);
+      Translator translator = Translator(authKey: _apiKey, maxRetries: maxRetryCount);
       // Get available languages
 
       // Get usage
@@ -44,8 +43,7 @@ class DeeplTranslationDelegate extends TranslationDelegate {
 
       List<Language> targetLanguages = await translator.getTargetLanguages();
       var list = targetLanguages.where((language) {
-        return language.languageCode.toLowerCase() ==
-            locale.languageCode.toLowerCase();
+        return language.languageCode.toLowerCase() == locale.languageCode.toLowerCase();
       });
       if (list.isEmpty) {
         //'Language ${locale.languageCode} not supported. Supported are only ${targetLanguages.toString()
@@ -101,12 +99,9 @@ class DeeplTranslationDelegate extends TranslationDelegate {
             for (String newVariable in newVariables) {
               if (_getMaxNestingDepth(newVariable) > 1) {
                 List<String> newVariables2 = _getBracketsLevel(newVariable, 2);
-                List<String> oldVariables2 =
-                    _getBracketsLevel(oldVariables[j], 2);
-                oldVariables[j] = oldVariables[j]
-                    .replaceAll('{${oldVariables[j]}', '{$newVariable}');
-                newVariable = newVariable.replaceAll(
-                    newVariables2.first, oldVariables2.first);
+                List<String> oldVariables2 = _getBracketsLevel(oldVariables[j], 2);
+                oldVariables[j] = oldVariables[j].replaceAll('{${oldVariables[j]}', '{$newVariable}');
+                newVariable = newVariable.replaceAll(newVariables2.first, oldVariables2.first);
                 oldEntry = oldEntry.replaceAll(oldVariables[j], newVariable);
               } else {
                 oldEntry = oldEntry.replaceAll(oldVariables[j], newVariable);
@@ -124,7 +119,7 @@ class DeeplTranslationDelegate extends TranslationDelegate {
       final response = jsonEncode(json); //result.text;
 
       return response;
-    } on DeepLError catch (e) {
+    } on DeepLError catch (_) {
       throw ServerBusyException();
     } on RequestFailedException catch (e) {
       if (e.statusCode == 401) {
