@@ -13,6 +13,12 @@ class UnsupportedUserLocationException implements TranslateException {
       'Vertex AI model provider. See the documentation for more information';
 }
 
+class ServerBusyException implements TranslateException {
+  @override
+  String get message =>
+      'DeepL servers are currently experiencing high load. Too many requests.';
+}
+
 class SafetyException implements TranslateException {
   @override
   String get message =>

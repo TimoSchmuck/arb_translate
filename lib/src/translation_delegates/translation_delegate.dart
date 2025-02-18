@@ -88,6 +88,13 @@ abstract class TranslationDelegate {
 
       try {
         response = await getModelResponse(resources, locale);
+      } on ServerBusyException {
+        print(
+          'Server busy for batch $batchName, retrying in '
+          '${queryBackoff.inSeconds}s...',
+        );
+        await Future.delayed(queryBackoff);
+        continue;
       } on QuotaExceededException {
         print(
           'Quota exceeded for batch $batchName, retrying in '

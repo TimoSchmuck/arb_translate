@@ -47,9 +47,10 @@ class DeeplTranslationDelegate extends TranslationDelegate {
         return language.languageCode.toLowerCase() ==
             locale.languageCode.toLowerCase();
       });
-      if (list.isEmpty)
-        throw Exception(
-            'Language ${locale.languageCode} not supported. Supported are only ${targetLanguages.toString()}');
+      if (list.isEmpty) {
+        //'Language ${locale.languageCode} not supported. Supported are only ${targetLanguages.toString()
+        throw UnsupportedUserLocationException();
+      }
       List<String> texts = [];
       var json = jsonDecode(encodedResources);
       for (String entry in json.keys) {
@@ -123,6 +124,8 @@ class DeeplTranslationDelegate extends TranslationDelegate {
       final response = jsonEncode(json); //result.text;
 
       return response;
+    } on DeepLError catch (e) {
+      throw ServerBusyException();
     } on RequestFailedException catch (e) {
       if (e.statusCode == 401) {
         throw InvalidApiKeyException();
