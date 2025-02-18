@@ -12,8 +12,10 @@ void main() {
     () {
       setUpAll(
         () {
-          if (Platform.environment['ARB_TRANSLATE_DEEPL_API_KEY']?.isEmpty ?? true) {
-            throw Exception('Missing ARB_TRANSLATE_DEEPL_API_KEY environment variable');
+          if (Platform.environment['ARB_TRANSLATE_DEEPL_API_KEY']?.isEmpty ??
+              true) {
+            throw Exception(
+                'Missing ARB_TRANSLATE_DEEPL_API_KEY environment variable');
           }
         },
       );

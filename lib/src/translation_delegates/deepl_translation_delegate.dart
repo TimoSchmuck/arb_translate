@@ -32,7 +32,8 @@ class DeeplTranslationDelegate extends TranslationDelegate {
     final encodedResources = JsonEncoder.withIndent('  ').convert(resources);
 
     try {
-      Translator translator = Translator(authKey: _apiKey, maxRetries: maxRetryCount);
+      Translator translator =
+          Translator(authKey: _apiKey, maxRetries: maxRetryCount);
       // Get available languages
 
       // Get usage
@@ -41,16 +42,20 @@ class DeeplTranslationDelegate extends TranslationDelegate {
         throw QuotaExceededException();
       }
 
-      List<Language> sourceLanguages = await translator.getSourceLanguages();
       List<Language> targetLanguages = await translator.getTargetLanguages();
       var list = targetLanguages.where((language) {
-        return language.languageCode.toLowerCase() == locale.languageCode.toLowerCase();
+        return language.languageCode.toLowerCase() ==
+            locale.languageCode.toLowerCase();
       });
-      if (list.isEmpty) throw Exception('Language ${locale.languageCode} not supported. Supported are only ${targetLanguages.toString()}');
+      if (list.isEmpty)
+        throw Exception(
+            'Language ${locale.languageCode} not supported. Supported are only ${targetLanguages.toString()}');
       List<String> texts = [];
       var json = jsonDecode(encodedResources);
       for (String entry in json.keys) {
-        if (entry.startsWith("@")) continue;
+        if (entry.startsWith("@")) {
+          continue;
+        }
         texts.add(json[entry].toString());
       }
       List<TextResult> result = await translator.translateTextList(
@@ -63,7 +68,9 @@ class DeeplTranslationDelegate extends TranslationDelegate {
       //assumption: the order of the result entry is the same as the one send to Deepl
       int i = 0;
       for (String entry in json.keys) {
-        if (entry.startsWith("@")) continue;
+        if (entry.startsWith("@")) {
+          continue;
+        }
         String newValue = result[i].text;
         int depth = _getMaxNestingDepth(newValue);
         switch (depth) {
@@ -93,9 +100,12 @@ class DeeplTranslationDelegate extends TranslationDelegate {
             for (String newVariable in newVariables) {
               if (_getMaxNestingDepth(newVariable) > 1) {
                 List<String> newVariables2 = _getBracketsLevel(newVariable, 2);
-                List<String> oldVariables2 = _getBracketsLevel(oldVariables[j], 2);
-                oldVariables[j] = oldVariables[j].replaceAll('{${oldVariables[j]}', '{$newVariable}');
-                newVariable = newVariable.replaceAll(newVariables2.first, oldVariables2.first);
+                List<String> oldVariables2 =
+                    _getBracketsLevel(oldVariables[j], 2);
+                oldVariables[j] = oldVariables[j]
+                    .replaceAll('{${oldVariables[j]}', '{$newVariable}');
+                newVariable = newVariable.replaceAll(
+                    newVariables2.first, oldVariables2.first);
                 oldEntry = oldEntry.replaceAll(oldVariables[j], newVariable);
               } else {
                 oldEntry = oldEntry.replaceAll(oldVariables[j], newVariable);

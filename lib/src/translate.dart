@@ -59,7 +59,7 @@ Future<void> translate(
         useEscaping: options.useEscaping,
         relaxSyntax: options.relaxSyntax,
       ),
-    ModelProvider.deeple => DeeplTranslationDelegate(
+    ModelProvider.deepl => DeeplTranslationDelegate(
         apiKey: options.apiKey,
         batchSize: options.batchSize,
         context: options.context,
@@ -68,8 +68,10 @@ Future<void> translate(
       ),
   };
 
-  final bundles = AppResourceBundleCollection(fileSystem.directory(options.arbDir)).bundles;
-  final templateBundle = bundles.firstWhere((bundle) => bundle.file.path.endsWith(options.templateArbFile));
+  final bundles =
+      AppResourceBundleCollection(fileSystem.directory(options.arbDir)).bundles;
+  final templateBundle = bundles.firstWhere(
+      (bundle) => bundle.file.path.endsWith(options.templateArbFile));
 
   for (final bundle in bundles.where((bundle) => bundle != templateBundle)) {
     if (options.excludeLocales?.contains(bundle.locale.toString()) ?? false) {
@@ -94,7 +96,8 @@ Future<void> _translateBundle({
   required AppResourceBundle templateBundle,
   required AppResourceBundle bundle,
 }) async {
-  final untranslatedResourceIds = findUntranslatedResourceIds(bundle, templateBundle);
+  final untranslatedResourceIds =
+      findUntranslatedResourceIds(bundle, templateBundle);
 
   if (untranslatedResourceIds.isEmpty) {
     print('No terms to translate for locale ${bundle.locale}');
