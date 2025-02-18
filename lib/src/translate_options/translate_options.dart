@@ -12,7 +12,8 @@ enum ModelProvider {
   customOpenAiCompatible(
     'custom',
     'Custom Open AI compatible',
-  );
+  ),
+  deeple('deepl', 'Deepl');
 
   const ModelProvider(this.key, this.name);
 
@@ -28,16 +29,23 @@ enum Model {
   gpt35Turbo('gpt-3.5-turbo', 'GPT-3.5 Turbo'),
   gpt4('gpt-4', 'GPT-4'),
   gpt4Turbo('gpt-4-turbo', 'GPT-4 Turbo'),
-  gpt4O('gpt-4o', 'GPT-4o');
+  gpt4O('gpt-4o', 'GPT-4o'),
+  deepl('standard', 'standard');
 
   const Model(this.key, this.name);
 
   final String key;
   final String name;
 
-  List<ModelProvider> get providers => geminiModels.contains(this)
-      ? [ModelProvider.gemini, ModelProvider.vertexAi]
-      : [ModelProvider.openAi];
+  List<ModelProvider> get providers {
+    if (geminiModels.contains(this)) {
+      return [ModelProvider.gemini, ModelProvider.vertexAi];
+    } else if (gptModels.contains(this)) {
+      return [ModelProvider.openAi];
+    } else {
+      return [ModelProvider.deeple];
+    }
+  }
 
   /// Returns a set of Gemini models.
   static Set<Model> get geminiModels => {
@@ -52,6 +60,11 @@ enum Model {
         Model.gpt4,
         Model.gpt4Turbo,
         Model.gpt4O,
+      };
+
+  /// Returns a set of Gemini models.
+  static Set<Model> get deeplModels => {
+        Model.deepl,
       };
 }
 
@@ -106,23 +119,15 @@ class TranslateOptions {
     TranslateArgResults argResults,
     TranslateYamlResults yamlResults,
   ) {
-    final apiKey = argResults.apiKey ??
-        yamlResults.apiKey ??
-        Platform.environment['ARB_TRANSLATE_API_KEY'];
+    final apiKey = argResults.apiKey ?? yamlResults.apiKey ?? Platform.environment['ARB_TRANSLATE_API_KEY'];
 
     if (apiKey == null || apiKey.isEmpty) {
       throw MissingApiKeyException();
     }
 
-    final modelProvider = argResults.modelProvider ??
-        yamlResults.modelProvider ??
-        ModelProvider.gemini;
+    final modelProvider = argResults.modelProvider ?? yamlResults.modelProvider ?? ModelProvider.gemini;
 
-    final model = argResults.model ??
-        yamlResults.model ??
-        (modelProvider == ModelProvider.openAi
-            ? Model.gpt35Turbo
-            : Model.gemini10Pro);
+    final model = argResults.model ?? yamlResults.model ?? (modelProvider == ModelProvider.openAi ? Model.gpt35Turbo : Model.gemini10Pro);
     final customModel = argResults.customModel ?? yamlResults.customModel;
 
     if (modelProvider != ModelProvider.customOpenAiCompatible) {
@@ -135,36 +140,25 @@ class TranslateOptions {
       }
     }
 
-    if (modelProvider == ModelProvider.customOpenAiCompatible &&
-        customModel == null) {
+    if (modelProvider == ModelProvider.customOpenAiCompatible && customModel == null) {
       throw MissingCustomModelException();
     }
 
-    final vertexAiProjectUrlString =
-        argResults.vertexAiProjectUrl ?? yamlResults.vertexAiProjectUrl;
-    final Uri? vertexAiProjectUrl = vertexAiProjectUrlString != null
-        ? Uri.tryParse(vertexAiProjectUrlString)
-        : null;
+    final vertexAiProjectUrlString = argResults.vertexAiProjectUrl ?? yamlResults.vertexAiProjectUrl;
+    final Uri? vertexAiProjectUrl = vertexAiProjectUrlString != null ? Uri.tryParse(vertexAiProjectUrlString) : null;
 
     if (modelProvider == ModelProvider.vertexAi) {
       if (vertexAiProjectUrlString == null) {
         throw MissingVertexAiProjectUrlException();
       }
 
-      if (vertexAiProjectUrl == null ||
-          vertexAiProjectUrl.scheme != 'https' ||
-          !vertexAiProjectUrl.path.endsWith('models')) {
+      if (vertexAiProjectUrl == null || vertexAiProjectUrl.scheme != 'https' || !vertexAiProjectUrl.path.endsWith('models')) {
         throw InvalidVertexAiProjectUrlException();
       }
     }
 
-    final customModelProviderBaseUrlString =
-        argResults.customModelProviderBaseUrl ??
-            yamlResults.customModelProviderBaseUrl;
-    final Uri? customModelProviderBaseUrl =
-        customModelProviderBaseUrlString != null
-            ? Uri.tryParse(customModelProviderBaseUrlString)
-            : null;
+    final customModelProviderBaseUrlString = argResults.customModelProviderBaseUrl ?? yamlResults.customModelProviderBaseUrl;
+    final Uri? customModelProviderBaseUrl = customModelProviderBaseUrlString != null ? Uri.tryParse(customModelProviderBaseUrlString) : null;
 
     if (modelProvider == ModelProvider.customOpenAiCompatible) {
       if (customModelProviderBaseUrlString == null) {
@@ -191,11 +185,8 @@ class TranslateOptions {
       vertexAiProjectUrl: vertexAiProjectUrl,
       disableSafety: argResults.disableSafety ?? yamlResults.disableSafety,
       context: context,
-      arbDir: argResults.arbDir ??
-          yamlResults.arbDir ??
-          fileSystem.path.join('lib', 'l10n'),
-      templateArbFile:
-          argResults.templateArbFile ?? yamlResults.templateArbFile,
+      arbDir: argResults.arbDir ?? yamlResults.arbDir ?? fileSystem.path.join('lib', 'l10n'),
+      templateArbFile: argResults.templateArbFile ?? yamlResults.templateArbFile,
       excludeLocales: argResults.excludeLocales ?? yamlResults.excludeLocales,
       batchSize: argResults.batchSize ?? yamlResults.batchSize ?? 4096,
       useEscaping: argResults.useEscaping ?? yamlResults.useEscaping,

@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:arb_translate/src/find_untranslated_resource_ids.dart';
 import 'package:arb_translate/src/flutter_tools/gen_l10n_types.dart';
 import 'package:arb_translate/src/prepare_untranslated_resources.dart';
-import 'package:arb_translate/src/translation_delegates/translate_exception.dart';
 import 'package:arb_translate/src/translate_options/translate_options.dart';
 import 'package:arb_translate/src/translation_delegates/chat_gpt_translation_delegate.dart';
+import 'package:arb_translate/src/translation_delegates/deepl_translation_delegate.dart';
 import 'package:arb_translate/src/translation_delegates/gemini_translation_delegate.dart';
+import 'package:arb_translate/src/translation_delegates/translate_exception.dart';
 import 'package:arb_translate/src/translation_delegates/translation_delegate.dart';
 import 'package:arb_translate/src/write_updated_bundle.dart';
 import 'package:file/file.dart';
@@ -58,12 +59,17 @@ Future<void> translate(
         useEscaping: options.useEscaping,
         relaxSyntax: options.relaxSyntax,
       ),
+    ModelProvider.deeple => DeeplTranslationDelegate(
+        apiKey: options.apiKey,
+        batchSize: options.batchSize,
+        context: options.context,
+        useEscaping: options.useEscaping,
+        relaxSyntax: options.relaxSyntax,
+      ),
   };
 
-  final bundles =
-      AppResourceBundleCollection(fileSystem.directory(options.arbDir)).bundles;
-  final templateBundle = bundles.firstWhere(
-      (bundle) => bundle.file.path.endsWith(options.templateArbFile));
+  final bundles = AppResourceBundleCollection(fileSystem.directory(options.arbDir)).bundles;
+  final templateBundle = bundles.firstWhere((bundle) => bundle.file.path.endsWith(options.templateArbFile));
 
   for (final bundle in bundles.where((bundle) => bundle != templateBundle)) {
     if (options.excludeLocales?.contains(bundle.locale.toString()) ?? false) {
@@ -78,6 +84,9 @@ Future<void> translate(
       bundle: bundle,
     );
   }
+
+  //ToDo: here we can plug in the translations of txt files in the assets.
+  //fileSystem contains
 }
 
 Future<void> _translateBundle({
@@ -85,8 +94,7 @@ Future<void> _translateBundle({
   required AppResourceBundle templateBundle,
   required AppResourceBundle bundle,
 }) async {
-  final untranslatedResourceIds =
-      findUntranslatedResourceIds(bundle, templateBundle);
+  final untranslatedResourceIds = findUntranslatedResourceIds(bundle, templateBundle);
 
   if (untranslatedResourceIds.isEmpty) {
     print('No terms to translate for locale ${bundle.locale}');

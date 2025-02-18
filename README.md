@@ -89,6 +89,24 @@ You can use `arb_translate` with any model with an OpenAI-compatible API. To con
    of ARB messages in a single batch and does not include the prompt or app
    context.
 
+
+### Deepl configuration
+You can use `arb_translate` with Deepl service from DeepL Se:
+
+1. Get your API token for the DeepL API REST Service from the DeepL page
+   [here](https://www.deepl.com/de/pro/change-plan#developer)
+   Currently there is a free plan, where you can translate up to 500,000 characters/month for free.
+
+2. Save your API token in the environment variable `ARB_TRANSLATE_API_KEY` or
+   add `arb-translate-api-key: {your-api-key}` to `l10n.yaml` in your project.
+
+3. Define DeepL as model provider. To do it add
+   `arb-translate-model-provider: deepl` to `l10n.yaml` or use command
+   argument `--model-provider: deepl`
+
+4. (Optional) Add context of your application
+   `arb-translate-context: {your-app-context}` eg. "sporting goods store app"
+
 ## Usage
 To generate translations, simply call arb_translate. All messages included in
 the template ARB file but missing from other files will be translated. To add a
